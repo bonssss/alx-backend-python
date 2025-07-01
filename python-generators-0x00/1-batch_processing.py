@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 import mysql.connector
 
-def streamusersinbatches(batchsize):
+def stream_users_in_batches(batchsize):
     """Generator: yield batches of user_data rows as lists of dicts."""
     try:
         connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",  # Change if needed
+            password="",  # Update as needed
             database="ALX_prodev"
         )
         cursor = connection.cursor(dictionary=True)
@@ -24,8 +24,6 @@ def streamusersinbatches(batchsize):
             yield batch
             offset += batchsize
 
-        return  # Optional plain return, does NOT return data
-
     except mysql.connector.Error as err:
         print(f"MySQL Error: {err}")
 
@@ -34,12 +32,12 @@ def streamusersinbatches(batchsize):
             cursor.close()
         if connection:
             connection.close()
+    return  # Plain return to end generator
 
 def batch_processing(batchsize):
     """Generator: yield users over age 25 from batches."""
-    for batch in streamusersinbatches(batchsize):
+    for batch in stream_users_in_batches(batchsize):
         for user in batch:
             if user['age'] > 25:
                 yield user
-
-    return  # Optional plain return, does NOT return data
+    return  # Plain return to end generator
