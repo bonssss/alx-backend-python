@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test suite for the GithubOrgClient class.
+Test suite for GithubOrgClient class.
 """
 
 import unittest
@@ -10,16 +10,13 @@ from client import GithubOrgClient
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test cases for GithubOrgClient.org method."""
-
     @patch('client.get_json')
     @parameterized.expand([
         ("google",),
         ("abc",),
     ])
     def test_org(self, org_name, mock_get_json):
-        """Test that GithubOrgClient.org returns expected JSON payload."""
-        expected_payload = {"login": org_name, "id": 12345}
+        expected_payload = {"login": org_name, "id": 123}
         mock_get_json.return_value = expected_payload
 
         client = GithubOrgClient(org_name)
