@@ -66,6 +66,7 @@ class TestMemoize(unittest.TestCase):
 
     def test_memoize(self):
         """Test memoize caches method result and calls original method once."""
+
         class TestClass:
             def a_method(self):
                 return 42
@@ -76,9 +77,11 @@ class TestMemoize(unittest.TestCase):
 
         test_obj = TestClass()
 
-        with patch.object(TestClass, 
-                         "a_method", 
-                         return_value=42) as mocked_method:
+        with patch.object(
+            TestClass,
+            "a_method",
+            return_value=42
+        ) as mocked_method:
             result1 = test_obj.a_property
             result2 = test_obj.a_property
 
