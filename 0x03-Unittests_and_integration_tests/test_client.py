@@ -64,7 +64,9 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(mock_url.call_count, 1)
 
             # Verify get_json was called once with the mocked URL
-            mock_get_json.assert_called_once_with(test_url)
+            mock_get_json.assert_called_once_with(
+                "https://api.github.com/orgs/google/repos"
+            )
 
 
 if __name__ == '__main__':
