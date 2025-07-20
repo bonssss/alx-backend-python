@@ -23,7 +23,7 @@ class TestGithubOrgClient(unittest.TestCase):
         client = GithubOrgClient(org_name)
         self.assertEqual(client.org, expected_payload)
         mock_get_json.assert_called_once_with(
-            f"https://api.github.com/orgs/{org_name}"
+            "https://api.github.com/orgs/" + org_name
         )
 
     @patch.object(GithubOrgClient, 'org', new_callable=PropertyMock)
