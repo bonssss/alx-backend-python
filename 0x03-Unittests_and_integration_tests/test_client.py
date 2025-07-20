@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""
+Unittest for client.py module
+"""
+
 import unittest
 from unittest.mock import patch, PropertyMock
 from parameterized import parameterized
