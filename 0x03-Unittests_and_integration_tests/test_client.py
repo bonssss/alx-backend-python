@@ -55,10 +55,7 @@ class TestGithubOrgClient(unittest.TestCase):
             result = client.public_repos()
             self.assertEqual(result, ["repo1", "repo2", "repo3"])
             mock_url.assert_called_once()
-            mock_get_json.assert_called_once_with(
-                "https://api.github.com/"
-                "orgs/google/repos"
-            )
+            mock_get_json.assert_called_once_with(test_url)
 
 
 if __name__ == '__main__':
