@@ -16,7 +16,7 @@ class TestGithubOrgClient(unittest.TestCase):
         ("google", {"login": "google"}),
         ("abc", {"login": "abc"})
     ])
-    @patch('client.get_json')  # Patch where `get_json` is used (imported in client.py)
+    @patch('client.get_json')
     def test_org(self, org_name, expected_payload, mock_get_json):
         """Test GithubOrgClient.org returns expected payload"""
         mock_get_json.return_value = expected_payload
@@ -31,6 +31,25 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_org.return_value = {'repos_url': expected_url}
         client = GithubOrgClient("google")
         self.assertEqual(client._public_repos_url, expected_url)
+
+    @patch('client.get_json')
+    def test_public_repos(self, mock_get_json):
+        """Test public_repos method with mocked dependencies"""
+        mock_payload = [
+            {'name': 'repo1'},
+            {'name': 'repo2'},
+            {'name': 'repo3'}
+        ]
+        mock_get_json.return_value = mock_payload
+        test_url = "https://api.github.com/orgs/google/repos"
+
+        with patch.object(GithubOrgClient, "_public_repos_url", new_callable=PropertyMock) as mock_url:
+            mock_url.return_value = test_url
+            client = GithubOrgClient("google")
+            result = client.public_repos()
+            self.assertEqual(result, ["repo1", "repo2", "repo3"])
+            mock_url.assert_called_once()
+            mock_get_json.assert_called_once_with(test_url)
 
 
 if __name__ == '__main__':
