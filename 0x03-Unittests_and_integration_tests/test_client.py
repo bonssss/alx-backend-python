@@ -59,8 +59,10 @@ class TestGithubOrgClient(unittest.TestCase):
             mock_get_json.assert_called_once_with("https://api.github.com/orgs/google/repos")
 
     @parameterized.expand([
-        ({"license": {"key": "my_license"}}, "my_license", True),
-        ({"license": {"key": "other_license"}}, "my_license", False)
+        ({"license": {"key": "私のライセンス"}}, "my_license", True),
+        ({"license": {"key": "他のライセンス"}}, "my_license", False),
+        ({"license": None}, "my_license", False),
+        ({}, "my_license", False)
     ])
     def test_has_license(self, repo, license_key, expected):
         client = GithubOrgClient("google")
@@ -89,7 +91,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
                 return MockResponse(cls.org_payload)
             elif url == cls.org_payload["repos_url"]:
                 return MockResponse(cls.repos_payload)
-            return MockResponse(None)
+            else:
+                raise ValueError(f"Unexpected URL: {url}")
 
         cls.mock_get.side_effect = side_effect
 
@@ -110,6 +113,19 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             client.public_repos(license="apache-2.0"),
             self.apache2_repos
         )
+
+    def test_public_repos_empty(self):
+        """Test public_repos with empty repos_payload"""
+        self.mock_get.side_effect = lambda url: MockResponse(self.org_payload) if url == "https://api.github.com/orgs/google" else MockResponse([])
+        client = GithubOrgClient("google")
+        stef.assertEqual(client.public_repos(), [])
+
+    def test_public_repos_with_invalid_license(self):
+        """Test public_repos with repos missing license"""
+        invalid_repos = [{"name": "repo1", "license": None}, {"name": "repo2"}]
+        self.mock_get.side_effect = lambda url: MockResponse(self.org_payload) if url == "https://api.github.com/orgs/google" else MockResponse(invalid_repos)
+        client = GithubOrgClient("google")
+        self.assertEqual(client.public_repos(license="apache-2.0"), [])
 
 
 if __name__ == '__main__':
