@@ -4,17 +4,15 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
-from rest_framework import viewsets, status, filters  # ✅ Add filters here
+from .permissions import IsParticipantOfConversation
 
-
-
-# --------------------------
-# 1. Conversation ViewSet
-# --------------------------
 class ConversationViewSet(viewsets.ModelViewSet):
-    queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def get_queryset(self):
+        # Only conversations where user is a participant
+        return Conversation.objects.filter(participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
         participants = request.data.get('participants', [])
@@ -29,13 +27,13 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-# --------------------------
-# 2. Message ViewSet
-# --------------------------
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def get_queryset(self):
+        # Only messages in conversations where user participates
+        return Message.objects.filter(conversation__participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
         conversation_id = request.data.get('conversation')
@@ -48,6 +46,10 @@ class MessageViewSet(viewsets.ModelViewSet):
             conversation = Conversation.objects.get(pk=conversation_id)
         except Conversation.DoesNotExist:
             return Response({'error': 'Conversation not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check that user is participant before creating message
+        if request.user not in conversation.participants.all():
+            return Response({'error': 'You are not a participant of this conversation'}, status=status.HTTP_403_FORBIDDEN)
 
         message = Message.objects.create(
             sender=request.user,
