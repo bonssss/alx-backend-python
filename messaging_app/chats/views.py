@@ -1,10 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend  # add this
 
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsParticipantOfConversation
+from .pagination import StandardResultsSetPagination  # import your paginator
+from .filters import MessageFilter  # import your filters
+
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
@@ -30,6 +34,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    filter_backends = [DjangoFilterBackend]          # enable filtering backend
+    filterset_class = MessageFilter                   # specify the filter class
+    pagination_class = StandardResultsSetPagination   # specify pagination class
 
     def get_queryset(self):
         # Only messages in conversations where user participates
