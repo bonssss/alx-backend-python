@@ -11,25 +11,28 @@ class IsOwner(BasePermission):
         return obj.user == request.user
 class IsParticipantOfConversation(BasePermission):
     """
-    Permission to allow only authenticated users who are participants
-    of the conversation to access and modify messages.
+    Permission to allow only participants of the conversation
+    to send, view, update, and delete messages.
     """
 
     def has_permission(self, request, view):
-        # Ensure user is authenticated
-        return bool(request.user and request.user.is_authenticated)
+        return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        # Assuming 'obj' can be either a Conversation or Message instance
-        # and both have a 'participants' ManyToMany or a similar field
-
-        # If obj is a message, get its conversation participants
-        if hasattr(obj, 'conversation'):
-            participants = obj.conversation.participants.all()
-        elif hasattr(obj, 'participants'):
+        # Get participants depending on object type
+        if hasattr(obj, 'participants'):
             participants = obj.participants.all()
+        elif hasattr(obj, 'conversation'):
+            participants = obj.conversation.participants.all()
         else:
-            # fallback: if no participants info, deny access
             return False
 
-        return request.user in participants
+        if request.method in SAFE_METHODS:
+            # GET, HEAD, OPTIONS: allow if participant
+            return request.user in participants
+        elif request.method in ['PUT', 'PATCH', 'DELETE']:
+            # Only allow if participant
+            return request.user in participants
+        else:
+            # For other HTTP methods, deny by default
+            return False
