@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
@@ -16,17 +16,13 @@ class RequestLoggingMiddleware:
 
         return self.get_response(request)
     
-    
 class RestrictAccessByTimeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        current_time = datetime.now().time()
-        start_time = datetime.strptime("08:00", "%H:%M").time()
-        end_time = datetime.strptime("18:00", "%H:%M").time()
-
-        if not (start_time <= current_time <= end_time):
-            return HttpResponse("Access restricted to business hours (08:00 - 18:00).", status=403)
-
+        current_hour = datetime.now().hour
+        # Deny access if current time is between 9PM (21) and 6AM (6)
+        if 21 <= current_hour or current_hour < 6:
+            return HttpResponseForbidden("Access to chat is not allowed at this time.")
         return self.get_response(request)
