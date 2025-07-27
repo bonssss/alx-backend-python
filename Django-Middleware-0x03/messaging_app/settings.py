@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'chats.middleware.RequestLoggingMiddleware', 
     'chats.middleware.OffensiveLanguageMiddleware',
     'chats.middleware.OffensiveLanguageMiddleware',  # Ensure this is included
+    'chats.middleware.RolepermissionMiddleware',  # Example of another middleware
     
      
 ]
