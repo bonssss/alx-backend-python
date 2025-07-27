@@ -54,7 +54,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'chats.middleware.RestrictAccessByTimeMiddleware', 
-    'chats.middleware.RequestLoggingMiddleware',  
+    'chats.middleware.RequestLoggingMiddleware', 
+    'chats.middleware.OffensiveLanguageMiddleware', 
+    
      
 ]
 
