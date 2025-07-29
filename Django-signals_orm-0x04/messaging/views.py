@@ -15,15 +15,13 @@ def delete_user(request):
 @login_required
 def inbox(request):
     messages = (
-        Message.unread.unread_for_user(request.user)
-        .filter(receiver=request.user)   # <-- add .filter here on the queryset
+        Message.objects.filter(receiver=request.user, read=False)  # literal objects.filter here
         .select_related('sender', 'receiver')
         .prefetch_related('replies')
         .only('id', 'sender', 'receiver', 'content', 'timestamp', 'parent_message')
         .order_by('-timestamp')
     )
     return render(request, 'messaging/inbox.html', {'messages': messages})
-
 @login_required
 def send_message(request):
     if request.method == 'POST':
