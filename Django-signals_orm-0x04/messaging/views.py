@@ -14,7 +14,13 @@ def delete_user(request):
 
 @login_required
 def inbox(request):
-    messages = Message.objects.filter(receiver=request.user, parent_message__isnull=True).select_related('sender', 'receiver').prefetch_related('replies').order_by('-timestamp')
+    messages = (
+        Message.unread.unread_for_user(request.user)
+        .select_related('sender', 'receiver')
+        .prefetch_related('replies')
+        .only('id', 'sender', 'receiver', 'content', 'timestamp', 'parent_message')
+        .order_by('-timestamp')
+    )
     return render(request, 'messaging/inbox.html', {'messages': messages})
 
 @login_required
