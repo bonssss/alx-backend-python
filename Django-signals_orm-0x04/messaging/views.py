@@ -15,7 +15,8 @@ def delete_user(request):
 @login_required
 def inbox(request):
     messages = (
-        Message.unread.unread_for_user(request.user)   # Use custom manager method exactly
+        Message.unread.unread_for_user(request.user)
+        .filter(receiver=request.user)   # <-- add .filter here on the queryset
         .select_related('sender', 'receiver')
         .prefetch_related('replies')
         .only('id', 'sender', 'receiver', 'content', 'timestamp', 'parent_message')
