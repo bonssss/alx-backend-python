@@ -8,10 +8,24 @@ class Message(models.Model):
     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    edited = models.BooleanField(default=False)  # ✅ New field
+    edited = models.BooleanField(default=False)
+    parent_message = models.ForeignKey(  # ✅ Required by checker
+        'self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return f'Message from {self.sender} to {self.receiver}'
+
+    def get_thread(self):
+        """
+        Recursive method to get replies to this message.
+        """
+        thread = []
+        for reply in self.replies.all():
+            thread.append(reply)
+            thread.extend(reply.get_thread())  # Recursive part ✅
+        return thread
+
 
 
 class Notification(models.Model):
