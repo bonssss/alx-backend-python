@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, get_user_model
 from .models import Message
-
+from django.views.decorators.cache import cache_page
 User = get_user_model()
 
 @login_required
@@ -13,6 +13,7 @@ def delete_user(request):
     return redirect('home')
 
 @login_required
+@cache_page(60)
 def inbox(request):
     messages = (
         Message.objects.filter(receiver=request.user, read=False)  # literal objects.filter here
